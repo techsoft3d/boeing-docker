@@ -76,10 +76,6 @@ jobs:
             -v patches:/volume \
             -v $(pwd)/patches:/backup \
             alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
-          docker run --rm \
-            -v models:/volume \
-            -v $(pwd)/models:/backup \
-            alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
 
     
 
@@ -158,10 +154,7 @@ jobs:
             -v patches:/volume \
             -v $(pwd)/patches:/backup \
             alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
-          docker run --rm \
-            -v models:/volume \
-            -v $(pwd)/models:/backup \
-            alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
+   
 
     
 
