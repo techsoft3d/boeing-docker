@@ -1,0 +1,170 @@
+name: Docker Demo on Self-Hosted Runner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-in-paris:
+    name: Run on Paris Runner
+    runs-on: [self-hosted, paris]
+    steps:
+      - name: Fix permissions before checkout
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+      - name: Force delete previous build artifacts
+        run: sudo rm -rf $GITHUB_WORKSPACE/* || true
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main 
+          clean: true
+        
+      - name: Create hoops_license.txt
+        run: |
+          echo "${{ secrets.HOOPS_LICENSE }}" | base64 --decode > hoops_license.txt
+          ls -l hoops_license.txt  # Verify file exists
+          cat hoops_license.txt  # Debugging: Check file content (remove in production)
+
+      - name: Inject Host IP into index.html
+        run: |
+          sed -i 's|<head>|<head>\n<script>window.HOST_IP="${{ secrets.HOST_IP }}";</script>|' ./public/index.html
+
+      - name: Write SSL certificates to files
+        run: |
+          pwd  # Print the current working directory
+          ls -la  # List files before creating certs
+          mkdir -p certs
+          echo "${{ secrets.SSL_CERT }}" > certs/server.crt
+          echo "${{ secrets.SSL_KEY }}" > certs/server.key
+          echo "${{ secrets.CA_CERT }}" > certs/ca.crt
+
+      - name: Verify SSL Certificates
+        run: |
+          echo "🔍 Checking SSL certificate files..."
+          if [ ! -s certs/server.crt ] || [ ! -s certs/server.key ]; then
+            echo "❌ Error: SSL certificate files are missing or empty!"
+            exit 1
+          fi
+          ls -la certs/
+
+      - name: Set Environment Variable for Docker
+        run: echo "HOST_IP=${{ secrets.HOST_IP }}" >> $GITHUB_ENV
+
+      - name: Login to GitHub Packages
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Remove unused Docker images
+        run: docker image prune -af  
+        
+      - name: Pull Latest Docker Images
+        run: |
+          docker pull ghcr.io/techsoft3d/streaming-server:latest
+          docker pull ghcr.io/techsoft3d/node-server:latest
+          docker pull ghcr.io/techsoft3d/proxy-server:latest
+      
+      - name: Copy `./public` into External Docker Volume (Using Temporary Container)
+        run: |
+          docker run --rm \
+            -v public:/volume \
+            -v $(pwd)/public:/backup \
+            alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
+  
+          docker run --rm \
+            -v patches:/volume \
+            -v $(pwd)/patches:/backup \
+            alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
+          docker run --rm \
+            -v models:/volume \
+            -v $(pwd)/models:/backup \
+            alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
+
+    
+
+      - name: Build and Run Docker Containers
+        run: |
+          docker-compose -p main_project up -d --force-recreate
+
+
+  run-in-oregon:
+    name: Run on Oregon Runner
+    runs-on: [self-hosted, oregon]
+    steps:
+      - name: Fix permissions before checkout
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+      - name: Force delete previous build artifacts
+        run: sudo rm -rf $GITHUB_WORKSPACE/* || true
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main 
+          clean: true
+        
+      - name: Create hoops_license.txt
+        run: |
+          echo "${{ secrets.HOOPS_LICENSE }}" | base64 --decode > hoops_license.txt
+          ls -l hoops_license.txt  # Verify file exists
+          cat hoops_license.txt  # Debugging: Check file content (remove in production)
+
+      - name: Inject Host IP into index.html
+        run: |
+          sed -i 's|<head>|<head>\n<script>window.HOST_IP="${{ secrets.HOST_IP }}";</script>|' ./public/index.html
+
+      - name: Write SSL certificates to files
+        run: |
+          pwd  # Print the current working directory
+          ls -la  # List files before creating certs
+          mkdir -p certs
+          echo "${{ secrets.SSL_CERT }}" > certs/server.crt
+          echo "${{ secrets.SSL_KEY }}" > certs/server.key
+          echo "${{ secrets.CA_CERT }}" > certs/ca.crt
+
+      - name: Verify SSL Certificates
+        run: |
+          echo "🔍 Checking SSL certificate files..."
+          if [ ! -s certs/server.crt ] || [ ! -s certs/server.key ]; then
+            echo "❌ Error: SSL certificate files are missing or empty!"
+            exit 1
+          fi
+          ls -la certs/
+
+      - name: Set Environment Variable for Docker
+        run: echo "HOST_IP=${{ secrets.HOST_IP }}" >> $GITHUB_ENV
+
+      - name: Login to GitHub Packages
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Remove unused Docker images
+        run: docker image prune -af  
+        
+      - name: Pull Latest Docker Images
+        run: |
+          docker pull ghcr.io/techsoft3d/streaming-server:latest
+          docker pull ghcr.io/techsoft3d/node-server:latest
+          docker pull ghcr.io/techsoft3d/proxy-server:latest
+      
+      - name: Copy `./public` into External Docker Volume (Using Temporary Container)
+        run: |
+          docker run --rm \
+            -v public:/volume \
+            -v $(pwd)/public:/backup \
+            alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
+  
+          docker run --rm \
+            -v patches:/volume \
+            -v $(pwd)/patches:/backup \
+            alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
+          docker run --rm \
+            -v models:/volume \
+            -v $(pwd)/models:/backup \
+            alpine sh -c "cp -r /backup/* /volume/ && ls -la /volume/"
+
+    
+
+      - name: Build and Run Docker Containers
+        run: |
+          docker-compose -p main_project up -d --force-recreate         

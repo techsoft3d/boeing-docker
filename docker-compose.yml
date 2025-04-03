@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  hoops:
+    image: ghcr.io/techsoft3d/streaming-server:latest
+    container_name: hoops
+    restart: unless-stopped
+    ports:
+      - "11182:11182"
+      - "11000-11034:11000-11034"
+    volumes:
+      - "./patches/server_config.js:/opt/hoops_communicator/quick_start/server_config.js"
+      - "./patches/Utils.js:/opt/hoops_communicator/server/node/lib/Utils.js"
+      - models:/opt/hoops_communicator/models
+      - "./hoops_license.txt:/opt/hoops_communicator/hoops_license.txt"
+      - public:/opt/public  # Shared volume to copy files
+
+    environment:
+      - HOST_IP=${HOST_IP}
+    networks:
+      - shared-network 
+    command: ["/bin/sh", "-c", "
+        echo 'Copying HOOPS files to public/hoops...' &&
+        mkdir -p /opt/public/hoops &&
+        cp /opt/hoops_communicator/web_viewer/deprecated/src/js/hoops_web_viewer.js /opt/public/hoops/ &&
+        cp /opt/hoops_communicator/web_viewer/deprecated/src/js/engine-wasm.js /opt/public/hoops/ &&
+        cp /opt/hoops_communicator/web_viewer/deprecated/src/js/engine-asmjs.js /opt/public/hoops/ &&
+        cp /opt/hoops_communicator/web_viewer/deprecated/src/js/engine.wasm /opt/public/hoops/ &&
+        echo 'Copy complete. Starting Streaming Server...' &&
+        exec ../../3rd_party/node/bin/node --expose-gc ./lib/Startup.js --config-file ../../quick_start/server_config.js"]
+  app:
+    image: ghcr.io/techsoft3d/node-server:latest
+    container_name: file-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"  #change to whatever port you want files to be served from, but default is 3000
+    environment:
+      - PORT=3000  # This sets the PORT dynamically
+    volumes: 
+      - public:/app/public  # Mounts local "public" folder into the container
+    depends_on:
+      - hoops
+    networks:
+      - shared-network 
+
+  proxy-server:
+    image: ghcr.io/techsoft3d/proxy-server:latest  
+    container_name: proxy-server
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    depends_on:
+      - hoops
+    networks:
+      - shared-network 
+    volumes:
+      - ./certs:/app/certs 
+networks:
+  shared-network:
+    external: true
+
+volumes:
+  public:
+    external: true
+  # patches:
+  #   external: true
+  models:
+    external: true
