@@ -36,7 +36,7 @@ var config = {
     // This value has no effect when using proxying unless SSL is enabled.
     // When SSL is enabled, this hostname must be verifiable against the supplied
     // certificate chain.
-    publicHostname: "four-models-docker.techsoft3d.com" || "127.0.0.1", //change to server ip address if using ssl
+    publicHostname: "boeing-docker.techsoft3d.com" || "127.0.0.1", //change to server ip address if using ssl
 
     // Determine if the servers use a mix of IPv4 and IPv6, or force to all IPv4
     // IPVersion values: { Auto, ForceIPv4 }
