@@ -3,7 +3,7 @@
 
 <head>
     <title>
-        Boeing 777 | HOOPS Web Viewer
+        Staging Boeing 777 | HOOPS Web Viewer
     </title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="chrome=1;IE=edge" />
@@ -48,7 +48,7 @@
         async function startViewer() {
 
 
-            var server = new ServerConnection("https://boeing-docker.techsoft3d.com"); //change to IP of host server
+            var server = new ServerConnection("https://boeing-docker-staging.techsoft3d.com"); //change to IP of host server
 
             await server.connect();
             viewer = new Communicator.WebViewer({

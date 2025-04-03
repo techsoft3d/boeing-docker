@@ -28,7 +28,7 @@ LogSpawnCategory values can be binary or'd together using "|"
 var config = {
     // The port for the spawn-server REST and proxy calls. Note that setting this to 0 or null will disable the
     // the spawn-server, which may help with troubleshooting.
-    spawnServerPort: 11182,
+    spawnServerPort: 11183,
 
     // The hostname to use for broker-connection stream-cache servers or when enabling SSL.
     // This field can be used to generate endpoints containing a public DNS or IP address.
@@ -36,7 +36,7 @@ var config = {
     // This value has no effect when using proxying unless SSL is enabled.
     // When SSL is enabled, this hostname must be verifiable against the supplied
     // certificate chain.
-    publicHostname: "boeing-docker.techsoft3d.com" || "127.0.0.1", //change to server ip address if using ssl
+    publicHostname: "boeing-docker-staging.techsoft3d.com" || "127.0.0.1", //change to server ip address if using ssl
 
     // Determine if the servers use a mix of IPv4 and IPv6, or force to all IPv4
     // IPVersion values: { Auto, ForceIPv4 }
@@ -84,7 +84,7 @@ var config = {
 
     // First websocket port. The range of used Websocket ports will therefore be:
     //   [spawnWebsocketPortsBegin, (spawnWebsocketPortsBegin + spawnMaxSpawnCount - 1)]
-    spawnWebsocketPortsBegin: 11000,
+    spawnWebsocketPortsBegin: 11035,
 
     ////////////////////////////////////////////////////////////////////////////////
     // Liveliness settings for spawned stream-cache servers.
@@ -238,7 +238,7 @@ var config = {
     ////////////////////////////////////////////////////////////////////////////////
 
     // The port used by the http file-server. Set to null or 0 to disable the http server
-    fileServerPort: 11180,
+    fileServerPort: 11181,
 
     // Static directories used by the http file-server for serving content. Any relative directories are relative to 'communicatorDir'
     // Note that SCS models are delivered by the http server, thus scs paths are in here
