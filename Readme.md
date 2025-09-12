@@ -1,5 +1,5 @@
-# Four Models
-This repo will walk you through the steps to run a HOOPS Communicator based Linux Streaming Server Docker Container and a companion node-server for static files. 
+# Boeing
+This repo will walk you through the steps to run a HOOPS Visualize (formerly HOOPS Communicator) based Linux Streaming Server Docker Container and a companion node-server for static files. 
 
 ## Getting Stated 
 1. If you do not already have one, create a github token. This can be done here: https://github.com/settings/tokens. Be sure to give yourself full repo acces and write:packages access. 
